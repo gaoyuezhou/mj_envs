@@ -12,6 +12,8 @@ import numpy as np
 import pickle
 import time
 import os
+from mj_envs.agents.BC import init_agent_from_config
+
 
 DESC = '''
 Helper script to examine an environment and associated policy for behaviors; \n
@@ -56,7 +58,8 @@ def main(env_name, policy_path, mode, seed, num_episodes, render, camera_name, o
 
     # resolve policy and outputs
     if policy_path is not None:
-        pi = pickle.load(open(policy_path, 'rb'))
+        pi = init_agent_from_config(policy_path, 'cpu')
+        # pi = pickle.load(open(policy_path, 'rb'))
         if output_dir == './': # overide the default
             output_dir, pol_name = os.path.split(policy_path)
             output_name = os.path.splitext(pol_name)[0]
@@ -67,61 +70,26 @@ def main(env_name, policy_path, mode, seed, num_episodes, render, camera_name, o
         pi = rand_policy(env, seed)
         mode = 'exploration'
         output_name ='random_policy'
-
     # resolve directory
     if (os.path.isdir(output_dir) == False) and (render=='offscreen' or save_paths or plot_paths is not None):
         os.mkdir(output_dir)
 
-    # replay dapg datasets
-    # import pickle
-    # envname = 'door'
-    # paths = pickle.load(open(f"/home/franka/dev/kathyz/hand_dapg/dapg/demonstrations/{envname}-v0_demos.pickle", 'rb'))
-    # replayed_paths, paths = env.replay_paths(
-    #     original_paths=paths,
-    #     horizon=env.spec.max_episode_steps,
-    #     num_episodes=num_episodes,
-    #     frame_size=(640,480),
-    #     output_dir=output_dir+'/',
-    #     filename=output_name,
-    #     camera_name=camera_name,
-    #     render=render
-    # )
-    # with open(f"/home/franka/dev/kathyz/hand_dapg/dapg/demonstrations/replayed_{envname}-v0_demos.pickle", 'wb') as handle:
-    #     pickle.dump(replayed_paths, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-    import pickle
-    envname = 'relocate'
-    paths = pickle.load(open(f"/home/franka/dev/kathyz/relay-policy-learning/kitchen_demos_multitask/friday_microwave_topknob_bottomknob_slide/kitchen_relax-v10_path.pkl", 'rb'))
-    # dict_keys(['observations', 'actions', 'goals', 'init_qpos', 'init_qvel'])
-    # import pdb; pdb.set_trace()
-    replayed_paths, paths = env.replay_paths(
-        original_paths=paths,
+    # examine policy's behavior to recover paths
+    paths = env.examine_bc_policy(
+        policy=pi,
         horizon=env.spec.max_episode_steps,
         num_episodes=num_episodes,
         frame_size=(640,480),
+        mode=mode,
         output_dir=output_dir+'/',
         filename=output_name,
         camera_name=camera_name,
-        render=render
-    )
-    with open(f"/home/franka/dev/kathyz/hand_dapg/dapg/demonstrations/replayed_{envname}-v0_demos.pickle", 'wb') as handle:
-        pickle.dump(replayed_paths, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        render=render)
 
-    # examine policy's behavior to recover paths
-    # paths = env.examine_policy(
-    #     policy=pi,
-    #     horizon=env.spec.max_episode_steps,
-    #     num_episodes=num_episodes,
-    #     frame_size=(640,480),
-    #     mode=mode,
-    #     output_dir=output_dir+'/',
-    #     filename=output_name,
-    #     camera_name=camera_name,
-    #     render=render)
-    import pdb; pdb.set_trace()
     # evaluate paths
     success_percentage = env.env.evaluate_success(paths)
     print(f'Average success over rollouts: {success_percentage}')
+    print(f'Average return over rollouts: {   np.mean([ np.mean(paths[i]["rewards"]) for i in range(len(paths))])   }')
 
     # save paths
     time_stamp = time.strftime("%Y%m%d-%H%M%S")
