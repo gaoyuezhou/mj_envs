@@ -131,7 +131,7 @@ class RelocateEnvV1(env_base.MujocoEnv):
     def reset_model(self):
         qp = self.init_qpos.copy()
         qv = self.init_qvel.copy()
-        self.set_state(qp, qv)
+        self.sim.set_state(qpos=qp, qvel=qv)
         self.sim.model.body_pos[self.obj_bid,0] = self.np_random.uniform(low=-0.15, high=0.15)
         self.sim.model.body_pos[self.obj_bid,1] = self.np_random.uniform(low=-0.15, high=0.3)
         self.sim.model.site_pos[self.target_obj_sid, 0] = self.np_random.uniform(low=-0.2, high=0.2)
