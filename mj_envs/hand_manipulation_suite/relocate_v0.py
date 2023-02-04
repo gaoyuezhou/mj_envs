@@ -6,7 +6,8 @@ import os
 
 ADD_BONUS_REWARDS = True
 
-class RelocateEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
+from mjrl.utils.gym_env import GymEnv
+class RelocateEnvV0(mujoco_env.MujocoEnv, utils.EzPickle, GymEnv):
     def __init__(self):
         self.target_obj_sid = 0
         self.S_grasp_sid = 0

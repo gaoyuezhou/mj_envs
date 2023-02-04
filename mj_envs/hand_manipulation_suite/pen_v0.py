@@ -7,7 +7,9 @@ import os
 
 ADD_BONUS_REWARDS = True
 
-class PenEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
+from mjrl.utils.gym_env import GymEnv
+
+class PenEnvV0(mujoco_env.MujocoEnv, utils.EzPickle, GymEnv):
     def __init__(self):
         self.target_obj_bid = 0
         self.S_grasp_sid = 0
@@ -46,6 +48,7 @@ class PenEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
         self.act_rng = 0.5*(self.model.actuator_ctrlrange[:,1]-self.model.actuator_ctrlrange[:,0])
         self.action_space.high = np.ones_like(self.model.actuator_ctrlrange[:,1])
         self.action_space.low  = -1.0 * np.ones_like(self.model.actuator_ctrlrange[:,0])
+
 
     def step(self, a):
         a = np.clip(a, -1.0, 1.0)
@@ -142,3 +145,4 @@ class PenEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
                 num_success += 1
         success_percentage = num_success*100.0/num_paths
         return success_percentage
+

@@ -6,7 +6,8 @@ import os
 
 ADD_BONUS_REWARDS = True
 
-class DoorEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
+from mjrl.utils.gym_env import GymEnv
+class DoorEnvV0(mujoco_env.MujocoEnv, utils.EzPickle, GymEnv):
     def __init__(self):
         self.door_hinge_did = 0
         self.door_bid = 0

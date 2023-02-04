@@ -7,7 +7,8 @@ import os
 
 ADD_BONUS_REWARDS = True
 
-class HammerEnvV0(mujoco_env.MujocoEnv, utils.EzPickle):
+from mjrl.utils.gym_env import GymEnv
+class HammerEnvV0(mujoco_env.MujocoEnv, utils.EzPickle, GymEnv):
     def __init__(self):
         self.target_obj_sid = -1
         self.S_grasp_sid = -1
